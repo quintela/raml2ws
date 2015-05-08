@@ -1,0 +1,28 @@
+#%RAML 0.8
+---
+title: My Generator API 
+
+version: 3
+
+baseUri: http://gen.perl.ws/
+
+mediaType: application/json
+
+protocols: [ HTTP, HTTPS ]
+
+securitySchemes:
+  - basic:
+      type: Basic Authentication
+
+traits:
+  - !include trait/paging.yaml
+
+documentation:
+  - title: Home
+    content: Welcome to My Generator API.
+  - title: Overview
+    content: !include text/README.md
+
+/users: !include users.yaml
+
+/products: !include products.yaml

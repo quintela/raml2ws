@@ -1,0 +1,14 @@
+description: |
+  CRUD API for Users. 
+head:
+  description: Meta information about the state of this resource
+get:
+  description: List of all users
+  queryParameters:
+  is: [paged]
+  responses: 
+    200:
+      body:
+        application/json: 
+          example: !include examples/users/list.json
+    500:

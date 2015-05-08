@@ -1,0 +1,14 @@
+description: |
+  CRUD Hera API for Products. 
+head:
+  description: Meta information about the state of this resource
+get:
+  description: List of all products
+  queryParameters:
+  is: [paged]
+  responses: 
+    200:
+      body:
+        application/json: 
+          example: !include examples/products/list.json
+    500:
