@@ -7,8 +7,8 @@ use JSON::XS qw(decode_json);
 use YAML::Dumper;
 use YAML::XS;
 
-use constant DEBUG => 1;
-use Data::Dumper;
+use constant DEBUG => $ENV{DEBUG};
+require DDP if DEBUG;
 
 =head1 INTERFACE
 
@@ -16,10 +16,24 @@ bless'ed be the parser!
 Pass a file param and load RAML stuct to memory
 
 =cut
-
+sub dumpit;
 sub new {
   Carp::croak "Path to base RAML file is mandatory" unless $_[1];
   my $raml = iterate( __load_raml($_[1]) );
+
+  dumpit $raml;
+
+  my $self = {
+    __raw => {
+     __title__      => $raml->{title},
+     __version__    => $raml->{version},
+     __base_uri__   => $raml->{baseUri},
+     __media_type__ => $raml->{media_type},
+     __protocols__  => $raml->{protocols},
+  #  __schemas__ => .. ## to-do something about this
+    }
+  };
+
   bless $raml, $_[0];
 }
 
@@ -43,27 +57,25 @@ sub iterate {
             : iterate( $o->{$_}) 
         } keys %{$o} 
       }
-    : ( ref($o) && $o =~ /ARRAY\(/ ) ? [ map { iterate( $_ ) } @{$o} ] : $o;
+    : ( ref($o) && $o =~ /ARRAY\(/ ) 
+      ? [ map { 
+            __isa_include($_) 
+              ? iterate( __handle_include( $_ ) )
+              : iterate( $_ ) 
+          } @{$o} 
+        ] 
+      : $o;
 }
 
-=head2 __load_raml
+=head2 utilities
+
+__dumper, dumpit, __load_raml, __load_json
 
 =cut
 sub __load_raml { Load(__read_file($_[0])) }
-
-=head2 __load_json
-
-=cut
-
 sub __load_json { decode_json(__read_file($_[0])) }
-
-=head2 __dumper
-
-YAML::Dumper "proxy"
-
-=cut
-
 sub __dumper { state $dumper = YAML::Dumper->new; $dumper }
+sub dumpit($) { DEBUG ? ref($_[0]) ? say STDERR DDP::p( $_[0] ) : say STDERR $_[0] : 1 };
 
 
 =head2 __isa_include
@@ -92,7 +104,7 @@ loads a file from disk
 
 sub __read_file {
   my $buf;
-  say STDERR "try to read from '$_[0]'" if DEBUG;
+  dumpit "try to read from '$_[0]'";
   {
     local *FH;
     open FH, "$_[0]" or die $!;

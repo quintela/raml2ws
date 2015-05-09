@@ -11,6 +11,6 @@ my $parser = RAML::Parser->new( "$Bin/data/base.raml" );
 say STDERR "hello Sir...";
 use Data::Dumper;
 #print STDERR Dumper $parser->resources;
-print STDERR Dumper $parser;
+#print STDERR Dumper $parser;
 say STDERR "\ngoodbye Sir...";
 
