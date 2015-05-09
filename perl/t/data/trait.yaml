@@ -1,0 +1,19 @@
+paged:
+  usage: Apply this to any method that needs to be paged
+  description: Some requests require paging
+  queryParameters:
+    page:
+      description: Specify the page number
+      type: integer
+      required: false
+      minimum: 1
+      example: 10
+      default: 1
+    per_page:
+      description: Specify the number of records per page w/ minimum {minimum}
+      type: integer
+      required: false
+      minimum: 1
+      maximum: 100
+      example: 5
+      default: 10

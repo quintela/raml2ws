@@ -15,13 +15,13 @@ securitySchemes:
       type: Basic Authentication
 
 traits:
-  - !include trait/paging.yaml
+  - !include trait.yaml
 
 documentation:
   - title: Home
     content: Welcome to My Generator API.
   - title: Overview
-    content: !include text/README.md
+    content: !include README.md
 
 /users: !include users.yaml
 

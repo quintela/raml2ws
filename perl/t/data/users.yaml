@@ -10,5 +10,5 @@ get:
     200:
       body:
         application/json: 
-          example: !include examples/users/list.json
+          example: !include list.json
     500:
