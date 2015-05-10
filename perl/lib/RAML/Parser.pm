@@ -50,6 +50,7 @@ our $path;
 sub decode_raml($) { 
   Carp::croak 'Full path to RAML file should be supplied' unless $_[0];
   $path = __path($_[0]);
+  Carp::croak 'Invalid path to file' unless $path;
   __inflate( __load_raml($_[0]) ); 
 };
 
