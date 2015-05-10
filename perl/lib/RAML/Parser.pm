@@ -11,8 +11,8 @@ RAML is a simple and succinct way of describing practically-RESTful APIs.
 The goal is to allow API developers to write "specification first" 
 before implementing webservices.
 
-Used in conjuntion w/ L<RAML::> it can be used to bootstrap a webservice based on 
-its specification 
+Used in conjuntion w/ L<RAML::> it can be used to bootstrap a webservice 
+based on its specification 
 
 =head1 VERSION
   
@@ -32,8 +32,6 @@ L<JSON::XS>, L<YAML::XS> and L<YAML::Dumper>.
 =cut 
 use v5.20.2;
 
-use FindBin qw($Bin); ## TODO => remove
-
 use JSON::XS qw(decode_json);
 use YAML::Dumper;
 use YAML::XS;
@@ -51,8 +49,10 @@ our @EXPORT_OK = qw(decode_raml);
 
 =cut
 
+our $path;
 sub decode_raml($) { 
-  Carp::croak 'full path to RAML file should be supplied' unless $_[0];
+  Carp::croak 'Full path to RAML file should be supplied' unless $_[0];
+  $path = __path($_[0]);
   __inflate( __load_raml($_[0]) ); 
 };
 
@@ -61,35 +61,47 @@ sub decode_raml($) {
 sub __inflate {
   my $o = $_[0];
   return ( ref($o) && $o =~ /HASH\(/)
-    ? { map { $_ => __isa_include($o->{$_}) ? __inflate( __handle_include( $o->{$_} ) ) : __inflate( $o->{$_}) } keys %{$o} }
-    : ( ref($o) && $o =~ /ARRAY\(/ ) ? [ map { __isa_include($_) ? __inflate( __handle_include( $_ ) ) : __inflate( $_ ) } @{$o} ] : $o;
+    ? { map { $_ => __isa_include($o->{$_}) 
+      ? __inflate( __handle_include( $o->{$_} ) ) 
+      : __inflate( $o->{$_}) } keys %{$o} }
+    : ( ref($o) && $o =~ /ARRAY\(/ ) 
+      ? [ map { __isa_include($_) 
+          ? __inflate( __handle_include( $_ ) ) 
+          : __inflate( $_ ) } @{$o} ] 
+      : $o;
 }
 
 # test if value isa include
 sub __isa_include { ref($_[0]) eq 'include' ? 1 : 0; }
 
 #handle include routes
-#
-### TODO: find the bin from file-path and w/o findbin
-##### note that includes might be realtive or absolute
-#
 sub __handle_include {
   __dumper()->dump($_[0]) =~ /\!\!perl\/scalar:include\s*([^\s*]+)/;
-  my $file = "$Bin/data/$1";
+  my $file = __is_full_path($1) ? $1 : "$path/$1";
+
   return __read_file($file) if $file =~ /\.md$/;
   return __load_json($file) if $file =~ /\.json$/;
   return __load_raml($file) if $file =~ /\.(yaml|raml)$/;
+
   Carp::croak "oh! some unknown file extension";
   return;
 }
 
 #utilities
+sub __path { $_[0] =~ m{^(.+)?/[^\s]+\.[yr]aml$}; $1 }
+
+sub __is_full_path { $_[0] =~ m{/} ? 1 : 0 }
+
 sub __load_raml { Load(__read_file($_[0])); }
+
 sub __load_json { decode_json(__read_file($_[0])); }
+
 sub __dumper { state $dumper = YAML::Dumper->new; }
+
 sub dumpit($) { 
   DEBUG ? ref($_[0]) ? say STDERR DDP::p( $_[0] ) : say STDERR $_[0] : 1;
 }
+
 sub __read_file {
   my $buf;
   dumpit "try to read from '$_[0]'";
@@ -113,4 +125,6 @@ Tiago Quintela, <quintela[at]....pt>
 
 Copyright 2015 by Tiago Quintela
 
-This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+This library is free software; you can redistribute it and/or modify it 
+under the same terms as Perl itself.
+
