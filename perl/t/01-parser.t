@@ -10,9 +10,16 @@ use Test::Deep;
 
 use_ok('RAML');
 
-my $raml         = decode_raml "$Bin/data/base.raml";
-my $blessed_raml = RAML->new(file => "$Bin/data/base.raml");
+my $raw_raml  = decode_raml "$Bin/data/base.raml";
+my $raml      = RAML->new( file => "$Bin/data/base.raml" );
 
-cmp_deeply( (bless { raml => $raml },'RAML'), $blessed_raml, "raml ok!");
+
+cmp_deeply( $raw_raml , $raml->{raw}, "decode_raml ok!");
+
+is( $raml->title, 'My Generator API', 'Title ok!');
+is( $raml->version, '3', 'Version ok!');
+is( $raml->base_uri, 'http://gen.perl.ws/', 'Base URI ok!');
+is( $raml->media_type, undef, 'Media Type ok!');
+cmp_deeply( $raml->protocols, ['HTTP', 'HTTPS'], 'Protocols ok!');
 
 done_testing();

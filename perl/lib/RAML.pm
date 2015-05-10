@@ -43,16 +43,45 @@ sub decode_raml($){ RAML::Parser::decode_raml(@_) }
 =head1 OOP INTERFACE
 
 =cut 
+
+use RAML::Base;
+
 sub new {
   my ($class, %params) = @_;
   my $file = delete $params{file};
 
   my $raml = decode_raml $file if $file;
 
-  my $self = { raml => $raml };
+  my $self = { 
+    __root => RAML::Base->new( $raml ),
+    raw => $raml,
+  };
   bless $self, $class;
 }
 
+sub root{ $_[0]->{__root} } 
+
+=head2 title
+
+=cut
+sub title { $_[0]->root->title }
+=head2 version
+
+=cut
+sub version { $_[0]->root->version }
+=head2 base_uri
+
+=cut
+sub base_uri { $_[0]->root->base_uri }
+
+=head2 media_type
+
+=cut
+sub media_type { $_[0]->root->media_type }
+=head2 protocols
+
+=cut
+sub protocols { $_[0]->root->protocols }
 
 1;
 
