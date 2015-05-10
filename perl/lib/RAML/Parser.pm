@@ -36,9 +36,6 @@ use JSON::XS qw(decode_json);
 use YAML::Dumper;
 use YAML::XS;
 
-use constant DEBUG => $ENV{DEBUG};
-require DDP if DEBUG;
-
 use Exporter;
 our @ISA       = qw/Exporter/;
 our @EXPORT_OK = qw(decode_raml);
@@ -74,7 +71,7 @@ sub __inflate {
 # test if value isa include
 sub __isa_include { ref($_[0]) eq 'include' ? 1 : 0; }
 
-#handle include routes
+# handle include routes
 sub __handle_include {
   __dumper()->dump($_[0]) =~ /\!\!perl\/scalar:include\s*([^\s*]+)/;
   my $file = __is_full_path($1) ? $1 : "$path/$1";
@@ -87,7 +84,7 @@ sub __handle_include {
   return;
 }
 
-#utilities
+# utilities
 sub __path { $_[0] =~ m{^(.+)?/[^\s]+\.[yr]aml$}; $1 }
 
 sub __is_full_path { $_[0] =~ m{/} ? 1 : 0 }
@@ -97,10 +94,6 @@ sub __load_raml { Load(__read_file($_[0])); }
 sub __load_json { decode_json(__read_file($_[0])); }
 
 sub __dumper { state $dumper = YAML::Dumper->new; }
-
-sub dumpit($) { 
-  DEBUG ? ref($_[0]) ? say STDERR DDP::p( $_[0] ) : say STDERR $_[0] : 1;
-}
 
 sub __read_file {
   my $buf;
@@ -112,6 +105,12 @@ sub __read_file {
   }
   return $buf;
 }
+
+#use constant DEBUG => $ENV{DEBUG};
+#require DDP if DEBUG;
+# sub dumpit($) { 
+#   DEBUG ? ref($_[0]) ? say STDERR DDP::p( $_[0] ) : say STDERR $_[0] : 1;
+# }
 
 1;
 
