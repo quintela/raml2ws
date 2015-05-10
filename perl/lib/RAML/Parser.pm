@@ -27,7 +27,6 @@ use JSON::XS qw(decode_json);
 use YAML::Dumper;
 use YAML::XS;
 
-
 ## save path
 our $path;
 
