@@ -4,13 +4,15 @@ use 5.20.2;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use RAML::Parser;
+use RAML::Parser qw(decode_raml);
+use Test::More;
 
-my $parser = RAML::Parser->new( "$Bin/data/base.raml" );
+#use_ok('RAML::Parser');
+#my $ws = RAML::Parser->new( "$Bin/data/base.raml" );
 
-say STDERR "hello Sir...";
-use Data::Dumper;
-#print STDERR Dumper $parser->resources;
-#print STDERR Dumper $parser;
-say STDERR "\ngoodbye Sir...";
+#is(ref($ws), 'RAML::Parser', 'blessed struct correctly');
+say STDERR "doing for '$Bin/data/base.raml'";
+my $raml = decode_raml "$Bin/data/base.raml";
+use Data::Dumper; print STDERR Dumper $raml;
 
+done_testing();

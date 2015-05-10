@@ -1,8 +1,39 @@
 package RAML::Parser;
 
+=head1 NAME
+
+RAML::Parser - RESTful API Modeling Language (RAML)
+
+=head1 SYNOPSIS
+
+RAML is a simple and succinct way of describing practically-RESTful APIs. 
+
+The goal is to allow API developers to write "specification first" 
+before implementing webservices.
+
+Used in conjuntion w/ L<RAML::> it can be used to bootstrap a webservice based on 
+its specification 
+
+=head1 VERSION
+  
+  0.10
+
+=head1 DESCRIPTION
+
+RAML (RESTful API Modeling Language) is a simple and succinct way of 
+describing practically-RESTful APIs.
+See L<http://raml.org/>.
+
+This module converts RAML files to Perl data structures using
+L<JSON::XS>, L<YAML::XS> and L<YAML::Dumper>.
+
+=head1 INTERFACE
+
+=cut 
 use v5.20.2;
 
-use FindBin qw($Bin);
+use FindBin qw($Bin); ## TODO => remove
+
 use JSON::XS qw(decode_json);
 use YAML::Dumper;
 use YAML::XS;
@@ -10,84 +41,38 @@ use YAML::XS;
 use constant DEBUG => $ENV{DEBUG};
 require DDP if DEBUG;
 
-=head1 INTERFACE
+use Exporter;
+our @ISA       = qw/Exporter/;
+our @EXPORT_OK = qw(decode_raml);
 
-bless'ed be the parser!
-Pass a file param and load RAML stuct to memory
+=head2 decode_raml
 
-=cut
-sub dumpit;
-sub new {
-  Carp::croak "Path to base RAML file is mandatory" unless $_[1];
-  my $raml = iterate( __load_raml($_[1]) );
-
-  dumpit $raml;
-
-  my $self = {
-    __raw => {
-     __title__      => $raml->{title},
-     __version__    => $raml->{version},
-     __base_uri__   => $raml->{baseUri},
-     __media_type__ => $raml->{media_type},
-     __protocols__  => $raml->{protocols},
-  #  __schemas__ => .. ## to-do something about this
-    }
-  };
-
-  bless $raml, $_[0];
-}
-
-=head1 OOP accessors
+  $perl_structure = decode_raml $raml_file
 
 =cut
 
-# sub {}
+sub decode_raml($) { 
+  Carp::croak 'full path to RAML file should be supplied' unless $_[0];
+  __inflate( __load_raml($_[0]) ); 
+};
 
-=head1 load files into mem 
-
-=cut
-sub iterate {
-  my $o = shift;
-
+# inflate
+# read external includes: .md, .yaml, .raml and .json
+sub __inflate {
+  my $o = $_[0];
   return ( ref($o) && $o =~ /HASH\(/)
-    ? { 
-        map { 
-          $_ => __isa_include($o->{$_}) 
-            ? iterate( __handle_include( $o->{$_} ) )
-            : iterate( $o->{$_}) 
-        } keys %{$o} 
-      }
-    : ( ref($o) && $o =~ /ARRAY\(/ ) 
-      ? [ map { 
-            __isa_include($_) 
-              ? iterate( __handle_include( $_ ) )
-              : iterate( $_ ) 
-          } @{$o} 
-        ] 
-      : $o;
+    ? { map { $_ => __isa_include($o->{$_}) ? __inflate( __handle_include( $o->{$_} ) ) : __inflate( $o->{$_}) } keys %{$o} }
+    : ( ref($o) && $o =~ /ARRAY\(/ ) ? [ map { __isa_include($_) ? __inflate( __handle_include( $_ ) ) : __inflate( $_ ) } @{$o} ] : $o;
 }
 
-=head2 utilities
-
-__dumper, dumpit, __load_raml, __load_json
-
-=cut
-sub __load_raml { Load(__read_file($_[0])) }
-sub __load_json { decode_json(__read_file($_[0])) }
-sub __dumper { state $dumper = YAML::Dumper->new; $dumper }
-sub dumpit($) { DEBUG ? ref($_[0]) ? say STDERR DDP::p( $_[0] ) : say STDERR $_[0] : 1 };
-
-
-=head2 __isa_include
-
-=cut 
+# test if value isa include
 sub __isa_include { ref($_[0]) eq 'include' ? 1 : 0; }
 
-=head2 __handle_include
-
-handle include routes
-## TODO: find the bin from file-path and w/o findbin
-=cut
+#handle include routes
+#
+### TODO: find the bin from file-path and w/o findbin
+##### note that includes might be realtive or absolute
+#
 sub __handle_include {
   __dumper()->dump($_[0]) =~ /\!\!perl\/scalar:include\s*([^\s*]+)/;
   my $file = "$Bin/data/$1";
@@ -98,10 +83,13 @@ sub __handle_include {
   return;
 }
 
-=head2 __read_file
-loads a file from disk
-=cut
-
+#utilities
+sub __load_raml { Load(__read_file($_[0])); }
+sub __load_json { decode_json(__read_file($_[0])); }
+sub __dumper { state $dumper = YAML::Dumper->new; }
+sub dumpit($) { 
+  DEBUG ? ref($_[0]) ? say STDERR DDP::p( $_[0] ) : say STDERR $_[0] : 1;
+}
 sub __read_file {
   my $buf;
   dumpit "try to read from '$_[0]'";
@@ -119,4 +107,10 @@ __END__
 
 =head1 AUTHOR
 
-Tiago Quintela 
+Tiago Quintela, <quintela[at]....pt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2015 by Tiago Quintela
+
+This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
