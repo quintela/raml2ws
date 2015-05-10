@@ -22,9 +22,37 @@ It can be used to bootstrap a webservice based on its specification
 RAML (RESTful API Modeling Language)
 See L<http://raml.org/>.
 
-=head1 INTERFACE
+=head1 FEATURES
+
+=head2 decode_raml
+  
+  use RAML qw(decode_raml);
+
+  decode_raml $raml_file;
 
 =cut 
+
+## setup exporter/"proxy" for decode_raml
+use RAML::Parser;
+use Exporter;
+our @ISA       = qw/Exporter/;
+our @EXPORT_OK = qw(decode_raml);
+
+sub decode_raml($){ RAML::Parser::decode_raml(@_) }
+
+=head1 OOP INTERFACE
+
+=cut 
+sub new {
+  my ($class, %params) = @_;
+  my $file = delete $params{file};
+
+  my $raml = decode_raml $file if $file;
+
+  my $self = { raml => $raml };
+  bless $self, $class;
+}
+
 
 1;
 

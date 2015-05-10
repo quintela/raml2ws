@@ -27,18 +27,14 @@ use JSON::XS qw(decode_json);
 use YAML::Dumper;
 use YAML::XS;
 
-use Exporter;
-our @ISA       = qw/Exporter/;
-our @EXPORT_OK = qw(decode_raml);
+
+## save path
+our $path;
 
 =head2 decode_raml
 
-  $perl_structure = decode_raml $raml_file
-
 =cut
-
-our $path;
-sub decode_raml($) { 
+sub decode_raml { 
   Carp::croak 'Full path to RAML file should be supplied' unless $_[0];
   $path = __path($_[0]);
   Carp::croak 'Invalid path to file' unless $path;
@@ -89,20 +85,13 @@ sub __dumper { state $dumper = YAML::Dumper->new; }
 
 sub __read_file {
   my $buf;
-  dumpit "try to read from '$_[0]'";
-  {
+  { 
     local *FH;
     open FH, "$_[0]" or die $!;
     -f FH and sysread FH, $buf, -s FH;
   }
   return $buf;
 }
-
-#use constant DEBUG => $ENV{DEBUG};
-#require DDP if DEBUG;
-# sub dumpit($) { 
-#   DEBUG ? ref($_[0]) ? say STDERR DDP::p( $_[0] ) : say STDERR $_[0] : 1;
-# }
 
 1;
 
