@@ -2,27 +2,18 @@ package RAML::Parser;
 
 =head1 NAME
 
-RAML::Parser - RESTful API Modeling Language (RAML)
+RAML::Parser
 
 =head1 SYNOPSIS
 
-RAML is a simple and succinct way of describing practically-RESTful APIs. 
-
-The goal is to allow API developers to write "specification first" 
-before implementing webservices.
-
-Used in conjuntion w/ L<RAML::> it can be used to bootstrap a webservice 
-based on its specification 
+Used in conjuntion w/ L<RAML> it can be used to bootstrap a webservice 
+given a specific template engine
 
 =head1 VERSION
   
   0.10
 
 =head1 DESCRIPTION
-
-RAML (RESTful API Modeling Language) is a simple and succinct way of 
-describing practically-RESTful APIs.
-See L<http://raml.org/>.
 
 This module converts RAML files to Perl data structures using
 L<JSON::XS>, L<YAML::XS> and L<YAML::Dumper>.
