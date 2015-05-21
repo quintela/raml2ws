@@ -55,37 +55,57 @@ sub new {
   my $file = delete $params{file};
   my $raml = decode_raml $file if $file;
 
-  my $self = { 
-    __root__  => RAML::Base->new( $raml ),
-    __raw__   => $raml, # todo: this doesn't make sense here
-  };
+  ## TODO: should I register RAML on object or just chew the struct and 
+  ### register the resulting chewed struct
+  ### id est => chew the struct on OBJ creation and just bless the reference
+  my $self = { __raw__  => $raml };
 
   bless $self, $class;
 }
 
-sub root { $_[0]->{__root__} }
+=head1 PRIVATE METHODS
+
+
+=cut
+
+=head2 __base
+
+=cut
+
+sub __base { state $base = RAML::Base->new( $_[0]->{__raw__} ); }
+
+
+
+=head1 PUBLIC METHODS
+
+=cut
 
 =head2 title
 
 =cut
-sub title { $_[0]->root->title }
+sub title { $_[0]->__base->title }
 =head2 version
 
 =cut
-sub version { $_[0]->root->version }
+sub version { $_[0]->__base->version }
 =head2 base_uri
 
 =cut
-sub base_uri { $_[0]->root->base_uri }
+sub base_uri { $_[0]->__base->base_uri }
 
 =head2 media_type
 
 =cut
-sub media_type { $_[0]->root->media_type }
+sub media_type { $_[0]->__base->media_type }
 =head2 protocols
 
 =cut
-sub protocols { $_[0]->root->protocols }
+sub protocols { $_[0]->__base->protocols }
+
+=head2 routes
+
+=cut
+sub routes { $_[0]->__base->routes }
 
 1;
 

@@ -24,4 +24,4 @@ cmp_deeply( $raml->protocols, ['HTTP', 'HTTPS'], 'Protocols ok!');
 
 done_testing();
 
-use Data::Dumper;say STDERR Dumper $raml;
+use Data::Dumper;say STDERR Dumper $raml->routes;

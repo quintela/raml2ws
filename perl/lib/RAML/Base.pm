@@ -23,10 +23,59 @@ sub new {
      __base_uri__   => $_[1]->{baseUri},
      __media_type__ => $_[1]->{mediaType},
      __protocols__  => $_[1]->{protocols},
+     __routes__     => __find_route_nodes( $_[1] )
     }
   }, $_[0];
 }
 
+=head1 PVT ACESSORS
+
+=head2 __find_route_nodes
+
+=cut
+sub __find_route_nodes {
+  my $base    = $_[0];
+  my $accum   = $_[1] // '';
+  my $routes;
+
+  foreach ( keys %$base ){
+    
+    if ( __isa_route( $_ ) ) {
+      
+      my @methods_of = grep { __isa_method( $_ ) } keys %{ $base->{$_} };
+
+      $routes->{ $accum . $_ }{methods} = \@methods_of;
+
+      $routes->{ $accum . $_ }{routes} = __find_route_nodes( 
+        $base->{$_}, $accum . $_ 
+      ) unless scalar @methods_of;
+
+      # Merge resulting flattened recursion
+      $routes = { 
+        %$routes, 
+        %{__find_route_nodes( $base->{$_},$accum . $_  ) || {} } 
+      };
+    }
+
+
+
+  }
+
+  return $routes;
+}
+
+=head2 __isa_route
+
+=cut 
+sub __isa_route { $_[0] =~ m{^/} ? 1 : 0; }
+
+
+=head2 __isa_method
+
+=cut
+sub __isa_method { lc($_[0]) =~ /^head|get|put|patch|delete|post$/ }
+
+=head1 PUBLIC METHODS
 
 =head2 title
 =cut
@@ -46,6 +95,11 @@ sub media_type { $_[0]->{__raw__}{__media_type__} }
 =head2 protocols
 =cut
 sub protocols { $_[0]->{__raw__}{__protocols__} }
+
+=head2 routes
+=cut
+sub routes { $_[0]->{__raw__}{__routes__} }
+
 1;
 
 __END__

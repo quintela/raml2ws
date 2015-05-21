@@ -12,3 +12,40 @@ get:
         application/json: 
           example: !include list.json
     500:
+/{productId}:
+  head:
+    description: List of all products
+    queryParameters:
+    is: [paged]
+    responses: 
+      200:
+        body:
+          application/json: 
+            example: !include list.json
+  get:
+    description: List of all products
+    queryParameters:
+    is: [paged]
+    responses: 
+      200:
+        body:
+          application/json: 
+            example: !include list.json
+  put:
+    description: List of all products
+    queryParameters:
+    is: [paged]
+    responses: 
+      200:
+        body:
+          application/json: 
+            example: !include list.json
+  patch:
+    description: List of all products
+    queryParameters:
+    is: [paged]
+    responses: 
+      200:
+        body:
+          application/json: 
+            example: !include list.json
