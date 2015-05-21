@@ -1,0 +1,93 @@
+[%-# 
+# INJECT AS PARAMS TO TEMPLATE
+# namespace, name, xgen_version, 
+# ws.modules.list, ws.modules.params, 
+# app_name, author, version, data 
+# raml.file.location
+-%]
+package [% namespace %][% name FILTER ucfist %];
+
+# X-Generated: raml2ws v[% xgen_version %]
+
+use v[% perl_version || '5.20.1' %];
+
+use Plack::App::File;
+use Web::Simple;
+use Module::Runtime 'require_module';
+
+method resources() {
+  return [
+  [%- FOREACH module IN ws.modules.list %]
+  '[% namespace %][% module FILTER ucfirst %]',
+  [% END %]
+  ];
+}
+
+sub dispatch_request { 
+  return ( 
+    $_[0]->routes( @_ ), 
+    $_[0]->invalid() 
+  ); 
+}
+
+method routes {
+  my @routes;
+
+  require_module $_,
+  push @routes, $_->new([%- ws.modules.params -%])->resources( @_ )
+    for @{$self->resources};
+
+  @routes;
+}
+
+method invalid {
+  return (
+    sub( GET + /static/doc ){ 
+      Plack::App::File->new(file => [%- raml.file.location -%] )->to_app;
+    },
+    sub( GET ){ 
+      $self->show_error(
+        $_[PSGI_ENV]->{HTTP_HOST}, 
+        404, 
+        "PATIENCE ONE MUST HAVE my young padawan" 
+      ); 
+    },
+    sub(){ 
+      $self->show_error(
+        $_[PSGI_ENV]->{HTTP_HOST}, 
+        405, 
+        'Method not allowed'
+      ); 
+    },
+  );
+}
+
+method show_error( $base_url, $status, $msg ){
+  http_htmlerror(
+    $status,
+    qq{<html>
+      <h2>$msg</h2>
+      <p>For more info please check
+      <a href="http://$base_url/static/doc">documentation here</a>
+      </p>
+      </html>}
+  );
+}
+
+1;
+
+=head1 SYNOPSIS
+
+[% name %] module for [% app_name %] application
+
+=head1 AUTHOR
+
+[% author %]
+
+=head1 VERSION
+
+[% version %]
+
+=head1 DATE
+
+[% date %]
