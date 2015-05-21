@@ -1,5 +1,7 @@
 package RAML;
 
+use v5.20.1;
+
 =head1 NAME
 
 RAML - RESTful API Modeling Language (RAML)
@@ -33,11 +35,12 @@ See L<http://raml.org/>.
 =cut 
 
 ## setup exporter/"proxy" for decode_raml
-use RAML::Parser;
+
 use Exporter;
 our @ISA       = qw/Exporter/;
 our @EXPORT_OK = qw(decode_raml);
 
+use RAML::Parser;
 sub decode_raml($){ RAML::Parser::decode_raml(@_) }
 
 =head1 OOP INTERFACE
@@ -48,18 +51,19 @@ use RAML::Base;
 
 sub new {
   my ($class, %params) = @_;
+  
   my $file = delete $params{file};
-
   my $raml = decode_raml $file if $file;
 
   my $self = { 
-    __root => RAML::Base->new( $raml ),
-    raw => $raml,
+    __root__  => RAML::Base->new( $raml ),
+    __raw__   => $raml, # todo: this doesn't make sense here
   };
+
   bless $self, $class;
 }
 
-sub root{ $_[0]->{__root} } 
+sub root { $_[0]->{__root__} }
 
 =head2 title
 

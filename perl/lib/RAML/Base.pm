@@ -21,7 +21,7 @@ sub new {
      __title__      => $_[1]->{title},
      __version__    => $_[1]->{version},
      __base_uri__   => $_[1]->{baseUri},
-     __media_type__ => $_[1]->{media_type},
+     __media_type__ => $_[1]->{mediaType},
      __protocols__  => $_[1]->{protocols},
     }
   }, $_[0];

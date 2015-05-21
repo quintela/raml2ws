@@ -1,5 +1,7 @@
 package RAML::Parser;
 
+use v5.20.1;
+
 =head1 NAME
 
 RAML::Parser
@@ -21,7 +23,6 @@ L<JSON::XS>, L<YAML::XS> and L<YAML::Dumper>.
 =head1 INTERFACE
 
 =cut 
-use v5.20.2;
 
 use JSON::XS qw(decode_json);
 use YAML::Dumper;
